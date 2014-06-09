@@ -41,7 +41,3 @@
 (defmacro defconduct
   [name dispatch-val & fn-tail]
   `(add-conduct ~name ~dispatch-val (fn ~@fn-tail)))
-
-(defn derive-all
-  ([tag parents]   (doseq [p parents] (derive tag p)))
-  ([h tag parents] (reduce #(derive %1 tag %2) h parents)))

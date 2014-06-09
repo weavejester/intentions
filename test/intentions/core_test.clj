@@ -42,9 +42,3 @@
     (add-conduct i ::maybe (constantly :maybe))
     (remove-conduct i ::maybe)
     (is (= (conducts i) {::good f1, ::bad f2}))))
-
-(deftest test-derive-all
-  (let [h (-> (make-hierarchy)
-              (derive-all ::foobar #{::foo ::bar}))]
-    (is (isa? h ::foobar ::foo))
-    (is (isa? h ::foobar ::bar))))
