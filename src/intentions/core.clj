@@ -1,5 +1,8 @@
 (ns intentions.core)
 
+(defn intent? [x]
+  (and (fn? x) (::conducts (meta x))))
+
 (defn make-intent
   [& {:keys [dispatch combine default hierarchy]
       :or   {default :default}}]

@@ -12,6 +12,7 @@
                        :combine   #(and %1 %2),
                        :hierarchy h
                        :default   ::default)]
+    (is (intent? i))
     (add-conduct i ::good (constantly true))
     (add-conduct i ::bad (constantly false))
     (add-conduct i ::default (constantly :maybe))
