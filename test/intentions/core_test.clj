@@ -2,29 +2,30 @@
   (:require [clojure.test :refer :all]
             [intentions.core :refer :all]))
 
-(defintent valid?
-  :dispatch identity
-  :combine  #(and %1 %2))
-
-(defconduct valid? ::good [_] true)
-
-(defconduct valid? ::bad [_] false)
-
-(derive ::a ::good)
-(derive ::b ::bad)
-(derive ::c ::good)
-(derive ::c ::bad)
-
 (deftest test-intent
-  (is (valid? ::a))
-  (is (not (valid? ::b)))
-  (is (not (valid? ::c))))
+  (let [h (-> (make-hierarchy)
+              (derive ::a ::good)
+              (derive ::b ::bad)
+              (derive ::c ::good)
+              (derive ::c ::bad))
+        i (make-intent {:dispatch identity, :combine #(and %1 %2), :hierarchy h})]
+    (add-conduct! i ::good (constantly true))
+    (add-conduct! i ::bad (constantly false))
+    (is (true? (i ::a)))
+    (is (false? (i ::b)))
+    (is (false? (i ::c)))))
 
 (deftest test-conducts
-  (is (map? (conducts valid?)))
-  (is (= (set (keys (conducts valid?))) #{::good ::bad})))
+  (let [h  (make-hierarchy)
+        i  (make-intent {:dispatch identity, :combine #(and %1 %2), :hierarchy h})
+        f1 (constantly true)
+        f2 (constantly false)]
+    (add-conduct! i ::good f1)
+    (add-conduct! i ::bad f2)
+    (is (= (conducts i) {::good f1, ::bad f2}))))
 
 (deftest test-derive-all
-  (derive-all ::foobar #{::foo ::bar})
-  (is (isa? ::foobar ::foo))
-  (is (isa? ::foobar ::bar)))
+  (let [h (-> (make-hierarchy)
+              (derive-all ::foobar #{::foo ::bar}))]
+    (is (isa? h ::foobar ::foo))
+    (is (isa? h ::foobar ::bar))))
