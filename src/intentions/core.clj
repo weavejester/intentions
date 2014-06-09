@@ -19,6 +19,9 @@
     (with-meta func
       (assoc (meta func) ::conducts conducts))))
 
+(defn conducts [intent]
+  (-> intent meta ::conducts deref))
+
 (defmacro defintent
   [name & {:as options}]
   `(def ~name (make-intent ~options)))
