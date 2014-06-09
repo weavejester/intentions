@@ -1,21 +1,15 @@
 (ns intentions.core)
 
-(defn- conduct-keys [hierarchy dispatch-val]
-  (into #{dispatch-val}
-        (if hierarchy
-          (ancestors hierarchy dispatch-val)
-          (ancestors dispatch-val))))
-
 (defn make-intent
   [{:keys [dispatch combine default hierarchy]
     :or   {default :default}}]
   (let [conducts (atom {})
+        isa?     (if hierarchy (partial isa? hierarchy) isa?)
         func     (fn [& args]
-                   (->> (apply dispatch args)
-                        (conduct-keys hierarchy)
-                        (keep @conducts)
-                        (map #(apply % args))
-                        (reduce combine)))]
+                   (let [d (apply dispatch args)]
+                     (->> @conducts
+                          (keep (fn [[k f]] (if (isa? d k) (apply f args))))
+                          (reduce combine))))]
     (with-meta func
       (assoc (meta func) ::conducts conducts))))
 
