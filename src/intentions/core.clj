@@ -17,19 +17,22 @@
     (with-meta func
       (assoc (meta func) ::conducts conducts))))
 
-(defn conducts [intent]
-  (-> intent meta ::conducts deref))
-
 (defmacro defintent
   [name & {:as options}]
   `(def ~name (make-intent ~options)))
 
-(defn add-conduct! [intent dispatch-val dispatch-fn]
+(defn conducts [intent]
+  (-> intent meta ::conducts deref))
+
+(defn add-conduct [intent dispatch-val dispatch-fn]
   (swap! (::conducts (meta intent)) assoc dispatch-val dispatch-fn))
+
+(defn remove-conduct [intent dispatch-val]
+  (swap! (::conducts (meta intent)) dissoc dispatch-val))
 
 (defmacro defconduct
   [name dispatch-val & fn-tail]
-  `(add-conduct! ~name ~dispatch-val (fn ~@fn-tail)))
+  `(add-conduct ~name ~dispatch-val (fn ~@fn-tail)))
 
 (defn derive-all
   ([tag parents]   (doseq [p parents] (derive tag p)))

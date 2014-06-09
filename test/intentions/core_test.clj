@@ -12,9 +12,9 @@
                         :combine   #(and %1 %2),
                         :hierarchy h
                         :default   ::default})]
-    (add-conduct! i ::good (constantly true))
-    (add-conduct! i ::bad (constantly false))
-    (add-conduct! i ::default (constantly :maybe))
+    (add-conduct i ::good (constantly true))
+    (add-conduct i ::bad (constantly false))
+    (add-conduct i ::default (constantly :maybe))
     (is (true? (i ::a)))
     (is (false? (i ::b)))
     (is (false? (i ::c)))
@@ -25,8 +25,10 @@
         i  (make-intent {:dispatch identity, :combine #(and %1 %2), :hierarchy h})
         f1 (constantly true)
         f2 (constantly false)]
-    (add-conduct! i ::good f1)
-    (add-conduct! i ::bad f2)
+    (add-conduct i ::good f1)
+    (add-conduct i ::bad f2)
+    (add-conduct i ::maybe (constantly :maybe))
+    (remove-conduct i ::maybe)
     (is (= (conducts i) {::good f1, ::bad f2}))))
 
 (deftest test-derive-all
