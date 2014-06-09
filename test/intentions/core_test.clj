@@ -3,23 +3,28 @@
             [intentions.core :refer :all]))
 
 (deftest test-intent
-  (let [h (-> (make-hierarchy)
-              (derive ::a ::good)
-              (derive ::b ::bad)
-              (derive ::c ::good)
-              (derive ::c ::bad))
-        i (make-intent :dispatch  identity
-                       :combine   #(and %1 %2),
-                       :hierarchy h
-                       :default   ::default)]
-    (is (intent? i))
-    (add-conduct i ::good (constantly true))
-    (add-conduct i ::bad (constantly false))
-    (add-conduct i ::default (constantly :maybe))
-    (is (true? (i ::a)))
-    (is (false? (i ::b)))
-    (is (false? (i ::c)))
-    (is (= (i ::d) :maybe))))
+  (testing "preconditions"
+    (is (thrown? AssertionError (make-intent)))
+    (is (thrown? AssertionError (make-intent :dispatch type)))
+    (is (thrown? AssertionError (make-intent :dispatch 1 :combine concat))))
+  (testing "usage"
+    (let [h (-> (make-hierarchy)
+                (derive ::a ::good)
+                (derive ::b ::bad)
+                (derive ::c ::good)
+                (derive ::c ::bad))
+          i (make-intent :dispatch  identity
+                         :combine   #(and %1 %2),
+                         :hierarchy h
+                         :default   ::default)]
+      (is (intent? i))
+      (add-conduct i ::good (constantly true))
+      (add-conduct i ::bad (constantly false))
+      (add-conduct i ::default (constantly :maybe))
+      (is (true? (i ::a)))
+      (is (false? (i ::b)))
+      (is (false? (i ::c)))
+      (is (= (i ::d) :maybe)))))
 
 (deftest test-conducts
   (let [h  (make-hierarchy)

@@ -6,6 +6,8 @@
 (defn make-intent
   [& {:keys [dispatch combine default hierarchy]
       :or   {default :default}}]
+  {:pre  [(ifn? dispatch) (ifn? combine)]
+   :post [(intent? %)]}
   (let [conducts (atom {})
         isa?     (if hierarchy (partial isa? hierarchy) isa?)
         find-fns (memoize (fn [cs d]
