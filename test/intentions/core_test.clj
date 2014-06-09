@@ -8,10 +8,10 @@
               (derive ::b ::bad)
               (derive ::c ::good)
               (derive ::c ::bad))
-        i (make-intent {:dispatch  identity
-                        :combine   #(and %1 %2),
-                        :hierarchy h
-                        :default   ::default})]
+        i (make-intent :dispatch  identity
+                       :combine   #(and %1 %2),
+                       :hierarchy h
+                       :default   ::default)]
     (add-conduct i ::good (constantly true))
     (add-conduct i ::bad (constantly false))
     (add-conduct i ::default (constantly :maybe))
@@ -22,7 +22,9 @@
 
 (deftest test-conducts
   (let [h  (make-hierarchy)
-        i  (make-intent {:dispatch identity, :combine #(and %1 %2), :hierarchy h})
+        i  (make-intent :dispatch identity
+                        :combine #(and %1 %2)
+                        :hierarchy h)
         f1 (constantly true)
         f2 (constantly false)]
     (add-conduct i ::good f1)

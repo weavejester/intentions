@@ -1,8 +1,8 @@
 (ns intentions.core)
 
 (defn make-intent
-  [{:keys [dispatch combine default hierarchy]
-    :or   {default :default}}]
+  [& {:keys [dispatch combine default hierarchy]
+      :or   {default :default}}]
   (let [conducts (atom {})
         isa?     (if hierarchy (partial isa? hierarchy) isa?)
         find-fns (memoize (fn [cs d]
@@ -19,7 +19,7 @@
 
 (defmacro defintent
   [name & {:as options}]
-  `(def ~name (make-intent ~options)))
+  `(def ~name (make-intent ~@options)))
 
 (defn conducts [intent]
   (-> intent meta ::conducts deref))
