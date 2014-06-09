@@ -7,6 +7,10 @@
     (is (thrown? AssertionError (make-intent)))
     (is (thrown? AssertionError (make-intent :dispatch type)))
     (is (thrown? AssertionError (make-intent :dispatch 1 :combine concat))))
+  (testing "no matching method"
+    (let [h (make-hierarchy)
+          i (make-intent :dispatch type :combine concat)]
+      (is (thrown? IllegalArgumentException (i ::a)))))
   (testing "usage"
     (let [h (-> (make-hierarchy)
                 (derive ::a ::good)
