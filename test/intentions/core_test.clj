@@ -42,3 +42,21 @@
     (add-conduct i ::maybe (constantly :maybe))
     (remove-conduct i ::maybe)
     (is (= (conducts i) {::good f1, ::bad f2}))))
+
+(deftest test-macros
+  (try
+    (defintent i-test
+      "Some docstring."
+      {:author "Foo"}
+      :dispatch type
+      :combine  into)
+    (is (= (-> #'i-test meta :doc) "Some docstring."))
+    (is (= (-> #'i-test meta :author) "Foo"))
+    (is (intent? i-test))
+
+    (defconduct i-test Long [x] #{:int})
+    (defconduct i-test Number [x] #{:num})
+
+    (is (= (i-test 1) #{:int :num}))
+    (finally
+      (ns-unmap *ns* 'i-test))))

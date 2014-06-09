@@ -1,4 +1,5 @@
-(ns intentions.core)
+(ns intentions.core
+  (:require [clojure.tools.macro :as macro]))
 
 (defn intent? [x]
   (and (fn? x) (::conducts (meta x))))
@@ -26,8 +27,9 @@
       (assoc (meta func) ::conducts conducts))))
 
 (defmacro defintent
-  [name & {:as options}]
-  `(def ~name (make-intent ~@options)))
+  [name & options]
+  (let [[name options] (macro/name-with-attributes name options)]
+    `(def ~name (make-intent ~@options))))
 
 (defn conducts [intent]
   (-> intent meta ::conducts deref))
