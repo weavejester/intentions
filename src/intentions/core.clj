@@ -5,7 +5,10 @@
     :or   {default :default}}]
   (let [conducts (atom {})
         isa?     (if hierarchy (partial isa? hierarchy) isa?)
-        find-fns (memoize (fn [cs d] (keep (fn [[k f]] (if (isa? d k) f)) cs)))
+        find-fns (memoize (fn [cs d]
+                            (let [fs (keep (fn [[k f]] (if (isa? d k) f)) cs)]
+                              (or (seq fs)
+                                  (list (get cs default))))))
         func     (fn [& args]
                    (->> (apply dispatch args)
                         (find-fns @conducts)
@@ -30,4 +33,4 @@
 
 (defn derive-all
   ([tag parents]   (doseq [p parents] (derive tag p)))
-  ([h tag parents] (doseq [p parents] (derive h tag p))))
+  ([h tag parents] (reduce #(derive %1 tag %2) h parents)))
