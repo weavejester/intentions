@@ -5,11 +5,12 @@
     :or   {default :default}}]
   (let [conducts (atom {})
         isa?     (if hierarchy (partial isa? hierarchy) isa?)
+        find-fns (memoize (fn [cs d] (keep (fn [[k f]] (if (isa? d k) f)) cs)))
         func     (fn [& args]
-                   (let [d (apply dispatch args)]
-                     (->> @conducts
-                          (keep (fn [[k f]] (if (isa? d k) (apply f args))))
-                          (reduce combine))))]
+                   (->> (apply dispatch args)
+                        (find-fns @conducts)
+                        (map #(apply % args))
+                        (reduce combine)))]
     (with-meta func
       (assoc (meta func) ::conducts conducts))))
 
