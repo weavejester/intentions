@@ -10,25 +10,26 @@
   {:pre  [(ifn? dispatch) (ifn? combine)]
    :post [(intent? %)]}
   (let [conducts (atom {})
-        isa?     (if hierarchy (partial isa? hierarchy) isa?)
-        findf    (fn [cs d]
-                   (let [fs (keep #(if (isa? d (key %)) (val %)) cs)]
-                     (or (seq fs)
-                         (some-> cs (get default) list)
-                         (throw (IllegalArgumentException.
-                                 (str "No conduct found for dispatch value: " d))))))
         cache    (atom {})
-        findf*   (fn [cs d]
-                   (if-let [f (@cache cs)]
-                     (f d)
-                     (let [f (memoize #(findf cs %))]
-                       (reset! cache {cs f})
-                       (f d))))
+        isa?     (if hierarchy #(isa? hierarchy %1 %2) isa?)
         func     (fn [& args]
-                   (->> (apply dispatch args)
-                        (findf* @conducts)
-                        (map #(apply % args))
-                        (reduce combine)))]
+                   (let [dv (apply dispatch args)
+                         fs (or (@cache dv)
+                                (loop [cs @conducts, fs '()]
+                                  (if (seq cs)
+                                    (let [c (first cs)]
+                                      (if (isa? dv (key c))
+                                        (recur (rest cs) (conj fs (val c)))
+                                        (recur (rest cs) fs)))
+                                    (do (swap! cache assoc dv fs)
+                                        fs))))]
+                     (if (seq fs)
+                       (loop [ret (apply (first fs) args), fs (rest fs)]
+                         (if (seq fs)
+                           (recur (combine ret (apply (first fs) args)) (rest fs))
+                           ret))
+                       (throw (IllegalArgumentException.
+                               (str "No conduct found for dispatch value: " dv))))))]
     (with-meta func
       (assoc (meta func) ::conducts conducts))))
 
