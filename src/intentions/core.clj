@@ -1,10 +1,14 @@
 (ns intentions.core
+  "Macros and functions for defining intentions."
   (:require [clojure.tools.macro :as macro]))
 
-(defn intent? [x]
+(defn intent?
+  "Returns true if the object is an intention."
+  [x]
   (and (fn? x) (::conducts (meta x))))
 
 (defn make-intent
+  "Create an anonymous intention. See: defintent."
   [& {:keys [dispatch combine default hierarchy]
       :or   {default :default}}]
   {:pre  [(ifn? dispatch) (ifn? combine)]
@@ -37,25 +41,45 @@
       (assoc (meta func) ::conducts conducts))))
 
 (defmacro defintent
+  "Create a new intention with the associated options. The docstring and
+  attribute map are optional.
+
+  Options are key-value pairs and may be one of:
+    :dispatch   the dispatch function, required
+    :combine    the combine function, required
+    :default    the default dispatch value, defaults to :default
+    :hierarchy  the isa? hierarchy to use for dispatching,
+                defaults to the global hierarchy"
+  {:arglists '([name docstring? attr-map? & options])}
   [name & options]
   (let [[name options] (macro/name-with-attributes name options)]
     `(def ~name (make-intent ~@options))))
 
-(defn conducts [intent]
+(defn conducts
+  "Returns a map of dispatch values to conduct functions for an intention."
+  [intent]
   (-> intent meta ::conducts deref :fmap))
 
-(defn add-conduct [intent dispatch-val dispatch-fn]
+(defn add-conduct
+  "Adds a conduct function to an intention for the supplied dispatch value.
+  See: defconduct."
+  [intent dispatch-val conduct-fn]
   (swap! (::conducts (meta intent))
-         #(-> % (assoc-in [:fmap dispatch-val] dispatch-fn)
+         #(-> % (assoc-in [:fmap dispatch-val] conduct-fn)
                 (assoc :cache {})))
   intent)
 
-(defn remove-conduct [intent dispatch-val]
+(defn remove-conduct
+  "Removes a conduct function from an intention for the supplied dispatch
+  value."
+  [intent dispatch-val]
   (swap! (::conducts (meta intent))
          #(-> % (update-in [:fmap] dissoc dispatch-val)
                 (assoc :cache {})))
   intent)
 
 (defmacro defconduct
-  [name dispatch-val & fn-tail]
-  `(add-conduct ~name ~dispatch-val (fn ~@fn-tail)))
+  "Creates and adds a new conduct function, associated with dispatch-val,
+  to the supplied intention."
+  [intent dispatch-val & fn-tail]
+  `(add-conduct ~intent ~dispatch-val (fn ~@fn-tail)))
