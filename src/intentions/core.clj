@@ -11,16 +11,22 @@
    :post [(intent? %)]}
   (let [conducts (atom {})
         isa?     (if hierarchy (partial isa? hierarchy) isa?)
-        find-fns (memoize
-                  (fn [cs d]
-                    (let [fs (keep (fn [[k f]] (if (isa? d k) f)) cs)]
-                      (or (seq fs)
-                          (if-let [f (get cs default)] (list f))
-                          (throw (IllegalArgumentException.
-                                  (str "No conduct found for dispatch value: " d)))))))
+        findf    (fn [cs d]
+                   (let [fs (keep #(if (isa? d (key %)) (val %)) cs)]
+                     (or (seq fs)
+                         (some-> cs (get default) list)
+                         (throw (IllegalArgumentException.
+                                 (str "No conduct found for dispatch value: " d))))))
+        cache    (atom {})
+        findf*   (fn [cs d]
+                   (if-let [f (@cache cs)]
+                     (f d)
+                     (let [f (memoize #(findf cs %))]
+                       (reset! cache {cs f})
+                       (f d))))
         func     (fn [& args]
                    (->> (apply dispatch args)
-                        (find-fns @conducts)
+                        (findf* @conducts)
                         (map #(apply % args))
                         (reduce combine)))]
     (with-meta func
