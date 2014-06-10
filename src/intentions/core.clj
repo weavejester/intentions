@@ -14,8 +14,9 @@
         func     (fn [& args]
                    (let [con @conducts
                          dv  (apply dispatch args)
+                         cs  (:fmap con)
                          fs  (or ((:cache con) dv)
-                                 (loop [cs (:fmap con) fs '()]
+                                 (loop [cs cs fs '()]
                                    (if (seq cs)
                                      (let [c (first cs)]
                                        (if (isa? dv (key c))
@@ -28,8 +29,10 @@
                          (if (seq fs)
                            (recur (combine ret (apply (first fs) args)) (rest fs))
                            ret))
-                       (throw (IllegalArgumentException.
-                               (str "No conduct found for dispatch value: " dv))))))]
+                       (if-let [f (cs default)]
+                         (apply f args)
+                         (throw (IllegalArgumentException.
+                                 (str "No conduct found for dispatch value: " dv)))))))]
     (with-meta func
       (assoc (meta func) ::conducts conducts))))
 
