@@ -25,6 +25,7 @@
       (add-conduct i ::good (constantly true))
       (add-conduct i ::bad (constantly false))
       (add-conduct i ::default (constantly :maybe))
+      (prefer-conduct i ::good ::bad)
       (is (true? (i ::a)))
       (is (false? (i ::b)))
       (is (false? (i ::c)))
