@@ -47,12 +47,14 @@
 (defn add-conduct [intent dispatch-val dispatch-fn]
   (swap! (::conducts (meta intent))
          #(-> % (assoc-in [:fmap dispatch-val] dispatch-fn)
-                (assoc :cache {}))))
+                (assoc :cache {})))
+  intent)
 
 (defn remove-conduct [intent dispatch-val]
   (swap! (::conducts (meta intent))
          #(-> % (update-in [:fmap] dissoc dispatch-val)
-                (assoc :cache {}))))
+                (assoc :cache {})))
+  intent)
 
 (defmacro defconduct
   [name dispatch-val & fn-tail]
