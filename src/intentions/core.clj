@@ -9,20 +9,20 @@
       :or   {default :default}}]
   {:pre  [(ifn? dispatch) (ifn? combine)]
    :post [(intent? %)]}
-  (let [conducts (atom {})
-        cache    (atom {})
+  (let [conducts (atom {:fmap {} :cache {}})
         isa?     (if hierarchy #(isa? hierarchy %1 %2) isa?)
         func     (fn [& args]
-                   (let [dv (apply dispatch args)
-                         fs (or (@cache dv)
-                                (loop [cs @conducts, fs '()]
-                                  (if (seq cs)
-                                    (let [c (first cs)]
-                                      (if (isa? dv (key c))
-                                        (recur (rest cs) (conj fs (val c)))
-                                        (recur (rest cs) fs)))
-                                    (do (swap! cache assoc dv fs)
-                                        fs))))]
+                   (let [con @conducts
+                         dv  (apply dispatch args)
+                         fs  (or ((:cache con) dv)
+                                 (loop [cs (:fmap con) fs '()]
+                                   (if (seq cs)
+                                     (let [c (first cs)]
+                                       (if (isa? dv (key c))
+                                         (recur (rest cs) (conj fs (val c)))
+                                         (recur (rest cs) fs)))
+                                     (do (swap! conducts assoc-in [:cache dv] fs)
+                                         fs))))]
                      (if (seq fs)
                        (loop [ret (apply (first fs) args), fs (rest fs)]
                          (if (seq fs)
@@ -39,13 +39,17 @@
     `(def ~name (make-intent ~@options))))
 
 (defn conducts [intent]
-  (-> intent meta ::conducts deref))
+  (-> intent meta ::conducts deref :fmap))
 
 (defn add-conduct [intent dispatch-val dispatch-fn]
-  (swap! (::conducts (meta intent)) assoc dispatch-val dispatch-fn))
+  (swap! (::conducts (meta intent))
+         #(-> % (assoc-in [:fmap dispatch-val] dispatch-fn)
+                (assoc :cache {}))))
 
 (defn remove-conduct [intent dispatch-val]
-  (swap! (::conducts (meta intent)) dissoc dispatch-val))
+  (swap! (::conducts (meta intent))
+         #(-> % (update-in [:fmap] dissoc dispatch-val)
+                (assoc :cache {}))))
 
 (defmacro defconduct
   [name dispatch-val & fn-tail]
