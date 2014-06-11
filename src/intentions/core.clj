@@ -23,34 +23,31 @@
   {:pre  [(ifn? dispatch) (ifn? combine)]
    :post [(intent? %)]}
   (let [conducts (atom {:fmap {} :cache {} :prefers #{}})
-        isa?     (if hierarchy #(isa? hierarchy %1 %2) isa?)
-        func     (fn [& args]
-                   (let [con  @conducts
-                         dv   (apply dispatch args)
-                         pref (:prefers con)
-                         cmp  (fn [a b]
-                                (cond
-                                 (or (isa? a b) (pref [a b])) 1
-                                 (or (isa? b a) (pref [b a])) -1
-                                 :else (throw (conduct-ambiguous dv a b))))
-                         fs   (or ((:cache con) dv)
-                                  (loop [cs (:fmap con) fs '()]
-                                    (if (seq cs)
-                                      (let [c (first cs)]
-                                        (if (isa? dv (key c))
-                                          (recur (rest cs) (conj fs c))
-                                          (recur (rest cs) fs)))
-                                      (let [fs (mapv val (sort-by key cmp fs))]
-                                        (swap! conducts assoc-in [:cache dv] fs)
-                                        fs))))]
+        isa? (if hierarchy #(isa? hierarchy %1 %2) isa?)
+        func (fn [& args]
+               (let [con @conducts
+                     dv (apply dispatch args)
+                     fs (or ((:cache con) dv)
+                            (let [pref (:prefers con)
+                                  cmp (fn [a b]
+                                        (cond
+                                         (or (isa? a b) (pref [a b])) 1
+                                         (or (isa? b a) (pref [b a])) -1
+                                         :else (throw (conduct-ambiguous dv a b))))
+                                  fs (->> (:fmap con)
+                                          (filter #(isa? dv (key %)))
+                                          (sort-by key cmp)
+                                          (mapv val))]
+                              (swap! conducts assoc-in [:cache dv] fs)
+                              fs))]
+                 (if (seq fs)
+                   (loop [ret (apply (first fs) args), fs (rest fs)]
                      (if (seq fs)
-                       (loop [ret (apply (first fs) args), fs (rest fs)]
-                         (if (seq fs)
-                           (recur (combine ret (apply (first fs) args)) (rest fs))
-                           ret))
-                       (if-let [f ((:fmap con) default)]
-                         (apply f args)
-                         (throw (conduct-not-found dv))))))]
+                       (recur (combine ret (apply (first fs) args)) (rest fs))
+                       ret))
+                   (if-let [f ((:fmap con) default)]
+                     (apply f args)
+                     (throw (conduct-not-found dv))))))]
     (with-meta func
       (assoc (meta func) ::conducts conducts))))
 
