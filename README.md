@@ -1,9 +1,8 @@
 # Intentions
 
-Intentions are a tool for runtime polymorphism and inheritance in
-Clojure, and are broadly similar to multimethods. While multimethods
-dispatch only once to the best matching method, intentions dispatch
-for all matches, then collate the results using a combining function.
+Intentions are a tool for runtime polymorphism in Clojure, and behave
+the same as multimethods with one key exception. Where multimethods
+*override* inherited behavior, intentions *combine* it.
 
 ## Installation
 
@@ -38,9 +37,9 @@ These are analogous to methods:
   (apply = (:sides shape))
 ```
 
-Unlike methods, conducts with derived dispatch values inherit
+Unlike methods, conducts with derived dispatch values combine the
 functionality of their parents. Because `::square` derives from
-`::quad`, both conducts are used when validating squares:
+`::quad`, both conducts are applied, then combined using `and`:
 
 ```clojure
 (valid? {:type ::square, :sides [2 2 2 2]})
@@ -49,6 +48,52 @@ functionality of their parents. Because `::square` derives from
 (valid? {:type ::square, :sides [2 2 2]})
 -> false
 ```
+
+Conducts are combined in a fixed order down the inheritance tree, with
+parents evaluated before children. So in the above case, the conduct
+for `::quad` is evaluated before `::square`. This ordering is
+particularly useful when using a combining function like `merge`.
+
+When the inheritance order is ambiguous (such as in the case of a
+[diamond dependency][1], dependencies are converted to strings and
+ordered alphanumerically, so as to always provide a consistent
+ordering. This can be overridden by using the `prefer-method`
+function.
+
+For example:
+
+```clojure
+;; Diamond dependency graph
+(derive ::b ::a)
+(derive ::c ::a)
+(derive ::d ::b)
+(derive ::d ::a)
+
+(defintent order-example
+  :dispatch identity
+  :combine  concat)
+
+(defconduct ::b [_] '(b))
+(defconduct ::c [_] '(c))
+```
+
+If we were to dispatch on `::d`, the order in which to apply `::b` and
+`::c` is ambiguous, so we default to alphanumeric ordering:
+
+```clojure
+(order-example ::d)
+-> (b c)
+```
+
+To explicit specify an ordering, use `prefer-method`:
+
+```clojure
+(prefer-method order-example ::c ::b)
+(order-example ::d)
+-> (c b)
+```
+
+[1]: https://en.wikipedia.org/wiki/Multiple_inheritance#The_diamond_problem
 
 ## License
 
