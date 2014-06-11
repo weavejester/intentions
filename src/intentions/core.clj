@@ -7,15 +7,6 @@
   [x]
   (and (fn? x) (::conducts (meta x))))
 
-(defn- conduct-not-found [dv]
-  (IllegalArgumentException.
-   (str "No conduct found for dispatch value: " dv)))
-
-(defn- conduct-ambiguous [dv a b]
-  (IllegalArgumentException.
-   (str "Multiple conducts match dispatch value: " dv " -> " a " and " b ","
-        "and neither is preferred")))
-
 (defn make-intent
   "Create an anonymous intention. See: defintent."
   [& {:keys [dispatch combine default hierarchy]
@@ -33,7 +24,7 @@
                                         (cond
                                          (or (isa? a b) (pref [a b])) 1
                                          (or (isa? b a) (pref [b a])) -1
-                                         :else (throw (conduct-ambiguous dv a b))))
+                                         :else (compare (str a) (str b))))
                                   fs (->> (:fmap con)
                                           (filter #(isa? dv (key %)))
                                           (sort-by key cmp)
@@ -47,7 +38,8 @@
                        ret))
                    (if-let [f ((:fmap con) default)]
                      (apply f args)
-                     (throw (conduct-not-found dv))))))]
+                     (throw (IllegalArgumentException.
+                             (str "No conduct found for dispatch value: " dv)))))))]
     (with-meta func
       (assoc (meta func) ::conducts conducts))))
 
@@ -95,7 +87,8 @@
   [intent dispatch-val-x dispatch-val-y]
   (swap! (::conducts (meta intent))
          #(-> % (update-in [:prefers] disj [dispatch-val-y dispatch-val-x])
-                (update-in [:prefers] conj [dispatch-val-x dispatch-val-y]))))
+                (update-in [:prefers] conj [dispatch-val-x dispatch-val-y])
+                (assoc :cache {}))))
 
 (defmacro defconduct
   "Creates and adds a new conduct function, associated with dispatch-val,

@@ -25,11 +25,25 @@
       (add-conduct i ::good (constantly true))
       (add-conduct i ::bad (constantly false))
       (add-conduct i ::default (constantly :maybe))
-      (prefer-conduct i ::good ::bad)
       (is (true? (i ::a)))
       (is (false? (i ::b)))
       (is (false? (i ::c)))
       (is (= (i ::d) :maybe)))))
+
+(deftest test-prefer-conduct
+  (let [h (-> (make-hierarchy)
+              (derive ::b ::a)
+              (derive ::c ::a)
+              (derive ::d ::b)
+              (derive ::d ::c))
+        i (make-intent :dispatch  identity
+                       :combine   merge
+                       :hierarchy h)]
+    (add-conduct i ::b (constantly {:value :b}))
+    (add-conduct i ::c (constantly {:value :c}))
+    (is (= (i ::d) {:value :c}))
+    (prefer-conduct i ::b ::c)
+    (is (= (i ::d) {:value :b}))))
 
 (deftest test-conducts
   (let [h  (make-hierarchy)
