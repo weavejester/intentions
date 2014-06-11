@@ -95,6 +95,10 @@ To explicit specify an ordering, use `prefer-method`:
 
 [1]: https://en.wikipedia.org/wiki/Multiple_inheritance#The_diamond_problem
 
+## Further Documentation
+
+* [API Docs](https://weavejester.github.io/intentions/intentions.core.html)
+
 ## License
 
 Copyright © 2014 James Reeves
