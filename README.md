@@ -11,7 +11,7 @@ the same as multimethods with one key exception. Where multimethods
 Add the following dependency to your project:
 
 ```clojure
-[intentions "0.1.0-SNAPSHOT"]
+[intentions "0.1.0"]
 ```
 
 ## Usage
