@@ -7,4 +7,5 @@
                  [org.clojure/tools.macro "0.1.2"]]
   :plugins [[codox "0.8.9"]]
   :profiles {:dev {:dependencies [[criterium "0.4.2"]]
-                   :jvm-opts ^:replace {}}})
+                   :jvm-opts ^:replace {}}
+             :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}})
