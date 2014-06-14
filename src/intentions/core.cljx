@@ -1,6 +1,6 @@
 (ns intentions.core
   "Macros and functions for defining intentions."
-  (:require [clojure.tools.macro :as macro]))
+  #+clj (:require [clojure.tools.macro :as macro]))
 
 (defn intent?
   "Returns true if the object is an intention."
@@ -37,7 +37,7 @@
           f))))
 
 (defn- no-conduct-error [dispatch-val]
-  (IllegalArgumentException.
+  (#+clj IllegalArgumentException. #+cljs js/Error.
    (str "No conduct found for dispatch value: " dispatch-val)))
 
 (defn make-intent
@@ -76,35 +76,32 @@
   [intent]
   (-> intent meta ::state deref :conducts))
 
-(defmacro ^:private swap!-> [a & forms]
-  `(swap! ~a (fn [x#] (-> x# ~@forms))))
-
 (defn add-conduct
   "Adds a conduct function to an intention for the supplied dispatch value.
   See: defconduct."
   [intent dispatch-val conduct-fn]
-  (swap!-> (::state (meta intent))
-           (assoc-in [:conducts dispatch-val] conduct-fn)
-           (assoc :cache {}))
+  (swap! (::state (meta intent))
+         #(-> % (assoc-in [:conducts dispatch-val] conduct-fn)
+                (assoc :cache {})))
   intent)
 
 (defn remove-conduct
   "Removes a conduct function from an intention for the supplied dispatch
   value."
   [intent dispatch-val]
-  (swap!-> (::state (meta intent))
-           (update-in [:conducts] dissoc dispatch-val)
-           (assoc :cache {}))
+  (swap! (::state (meta intent))
+         #(-> % (update-in [:conducts] dissoc dispatch-val)
+                (assoc :cache {})))
   intent)
 
 (defn prefer-conduct
   "Causes an intention to evaluate conducts for dispatch-val-x after
   dispatch-val-y, when neither dispatch value is more specific."
   [intent dispatch-val-x dispatch-val-y]
-  (swap!-> (::state (meta intent))
-           (update-in [:prefers] disj [dispatch-val-y dispatch-val-x])
-           (update-in [:prefers] conj [dispatch-val-x dispatch-val-y])
-           (assoc :cache {}))
+  (swap! (::state (meta intent))
+         #(-> % (update-in [:prefers] disj [dispatch-val-y dispatch-val-x])
+                (update-in [:prefers] conj [dispatch-val-x dispatch-val-y])
+                (assoc :cache {})))
   intent)
 
 (defmacro defconduct
