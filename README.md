@@ -2,9 +2,10 @@
 
 [![Build Status](https://travis-ci.org/weavejester/intentions.svg?branch=master)](https://travis-ci.org/weavejester/intentions)
 
-Intentions are a tool for runtime polymorphism in Clojure, and behave
-the same as multimethods with one key exception. Where multimethods
-*override* inherited behavior, intentions *combine* it.
+Intentions are a tool for runtime polymorphism in Clojure and
+ClojureScript. They behave the much same as multimethods, with one key
+exception: where multimethods *override* inherited behavior,
+intentions *combine* it.
 
 ## Installation
 
@@ -25,6 +26,8 @@ An intention is created with `defintent`:
 ```
 
 An intention needs both a dispatch function, and a combine function.
+The combine function combines two return values into one. In this
+case, we perform a logical AND on the values.
 
 Once an intention is stated, behavior can be added using conducts.
 These are analogous to methods:
