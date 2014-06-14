@@ -9,19 +9,20 @@
             [lein-cljsbuild "1.0.3"]
             [com.keminglabs/cljx "0.4.0"]
             [com.cemerick/clojurescript.test "0.3.1"]]
-  :codox {:sources ["target/classes"]}
-  :cljx  {:builds [{:source-paths ["src" "test"]
-                    :output-path "target/generated"
-                    :rules :clj}
-                   {:source-paths ["src" "test"]
-                    :output-path "target/generated"
-                    :rules :cljs}]}
-  :source-paths ["src" "target/generated"]
-  :test-paths   ["test" "target/generated"]
+  :codox {:sources ["target/generated/src"]}
+  :cljx
+  {:builds
+   [{:source-paths ["src"], :output-path "target/generated/src", :rules :clj}
+    {:source-paths ["test"], :output-path "target/generated/test", :rules :clj}
+    {:source-paths ["src"], :output-path "target/generated/src", :rules :cljs}
+    {:source-paths ["test"], :output-path "target/generated/test", :rules :cljs}]}
+  :source-paths ["src" "target/generated/src"]
+  :test-paths   ["test" "target/generated/test"]
   :hooks [cljx.hooks]
   :cljsbuild
-  {:builds [{:source-paths ["target/generated"]
-             :compiler {:output-to "target/main.js"}}]
+  {:builds
+   [{:source-paths ["target/generated/src" "target/generated/test"]
+     :compiler {:output-to "target/main.js"}}]
    :test-commands {"unit-tests" ["phantomjs" :runner "target/main.js"]}}
   :aliases
   {"test-cljs" ["do" ["cljx" "once"] ["cljsbuild" "test"]]
