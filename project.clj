@@ -1,4 +1,4 @@
-(defproject intentions "0.1.2"
+(defproject intentions "0.1.3"
   :description "Multimethods that combine rather than override inherited behavior"
   :url "https://github.com/weavejester/intentions"
   :license {:name "Eclipse Public License"
