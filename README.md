@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/weavejester/intentions.svg?branch=master)](https://travis-ci.org/weavejester/intentions)
 
 Intentions are a tool for runtime polymorphism in Clojure and
-ClojureScript. They behave the much same as multimethods, with one key
+ClojureScript. They behave much same as multimethods, with one key
 exception: where multimethods *override* inherited behavior,
 intentions *combine* it.
 
