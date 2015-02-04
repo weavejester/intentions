@@ -14,6 +14,7 @@
     {:source-paths ["test"], :output-path "target/generated/test", :rules :clj}
     {:source-paths ["src"], :output-path "target/generated/src", :rules :cljs}
     {:source-paths ["test"], :output-path "target/generated/test", :rules :cljs}]}
+  :prep-tasks   [["cljx" "once"]]
   :source-paths ["src" "target/generated/src"]
   :test-paths   ["test" "target/generated/test"]
   :cljsbuild
@@ -29,5 +30,4 @@
    :dev {:dependencies [[criterium "0.4.3"]]
          :jvm-opts ^:replace {}
          :plugins [[com.keminglabs/cljx "0.5.0"]
-                   [com.cemerick/clojurescript.test "0.3.3"]]
-         :prep-tasks [["cljx" "once"]]}})
+                   [com.cemerick/clojurescript.test "0.3.3"]]}})
