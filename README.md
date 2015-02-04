@@ -60,7 +60,7 @@ for `::quad` is evaluated before `::square`. This ordering is
 particularly useful when using a combining function like `merge`.
 
 When the inheritance order is ambiguous (such as in the case of a
-[diamond dependency][1], dependencies are converted to strings and
+[diamond dependency][1]), dependencies are converted to strings and
 ordered alphanumerically, so as to always provide a consistent
 ordering. This can be overridden by using the `prefer-method`
 function.
