@@ -62,7 +62,7 @@ particularly useful when using a combining function like `merge`.
 When the inheritance order is ambiguous (such as in the case of a
 [diamond dependency][1]), dependencies are converted to strings and
 ordered alphanumerically, so as to always provide a consistent
-ordering. This can be overridden by using the `prefer-method`
+ordering. This can be overridden by using the `prefer-conduct`
 function.
 
 For example:
@@ -90,10 +90,10 @@ If we were to dispatch on `::d`, the order in which to apply `::b` and
 -> (b c)
 ```
 
-To explicit specify an ordering, use `prefer-method`:
+To explicit specify an ordering, use `prefer-conduct`:
 
 ```clojure
-(prefer-method order-example ::c ::b)
+(prefer-conduct order-example ::c ::b)
 (order-example ::d)
 -> (c b)
 ```
