@@ -1,23 +1,20 @@
 (ns intentions.core-test
-  #+clj  (:require [clojure.test :refer :all]
-                   [intentions.core :as i])
-  #+cljs (:require-macros [cemerick.cljs.test :refer [is deftest testing]])
-  #+cljs (:require [cemerick.cljs.test :as t]
-                   [intentions.core :as i :include-macros true]))
+  #?@(:clj  [(:require [clojure.test :refer :all]
+                       [intentions.core :as i])]
+      :cljs [(:require-macros [cemerick.cljs.test :refer [is deftest testing]])
+             (:require [cemerick.cljs.test :as t]
+                       [intentions.core :as i :include-macros true])]))
 
 (deftest test-intent
   (testing "preconditions"
-    #+clj (is (thrown? AssertionError (i/make-intent)))
-    #+clj (is (thrown? AssertionError (i/make-intent :dispatch type)))
-    #+clj (is (thrown? AssertionError (i/make-intent :dispatch 1 :combine concat)))
-    #+cljs (is (thrown? js/Error (i/make-intent)))
-    #+cljs (is (thrown? js/Error (i/make-intent :dispatch type)))
-    #+cljs (is (thrown? js/Error (i/make-intent :dispatch 1 :combine concat))))
+    (is (thrown? #?(:clj AssertionError :cljs js/Error) (i/make-intent)))
+    (is (thrown? #?(:clj AssertionError :cljs js/Error) (i/make-intent :dispatch type)))
+    (is (thrown? #?(:clj AssertionError :cljs js/Error)
+                 (i/make-intent :dispatch 1 :combine concat))))
   (testing "no matching method"
     (let [h (make-hierarchy)
           i (i/make-intent :dispatch type :combine concat)]
-      #+clj (is (thrown? IllegalArgumentException (i ::a)))
-      #+cljs (is (thrown? js/Error (i ::a)))))
+      (is (thrown? #?(:clj IllegalArgumentException :cljs js/Error) (i ::a)))))
   (testing "usage"
     (let [h (-> (make-hierarchy)
                 (derive ::a ::good)
@@ -72,8 +69,8 @@
       {:author "Foo"}
       :dispatch identity
       :combine  into)
-    #+clj (is (= (-> #'i-test meta :doc) "Some docstring."))
-    #+clj (is (= (-> #'i-test meta :author) "Foo"))
+    #?(:clj (is (= (-> #'i-test meta :doc) "Some docstring.")))
+    #?(:clj (is (= (-> #'i-test meta :author) "Foo")))
     (is (i/intent? i-test))
 
     (derive ::ab ::a)
@@ -84,4 +81,4 @@
 
     (is (= (i-test ::ab) #{:a :b}))
     (finally
-      #+clj (ns-unmap *ns* 'i-test))))
+      #?(:clj (ns-unmap *ns* 'i-test)))))

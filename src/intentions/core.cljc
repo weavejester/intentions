@@ -1,6 +1,6 @@
 (ns intentions.core
   "Macros and functions for defining intentions."
-  #+clj (:require [clojure.tools.macro :as macro]))
+  #?(:clj (:require [clojure.tools.macro :as macro])))
 
 (defn intent?
   "Returns true if the object is an intention."
@@ -37,7 +37,7 @@
           f))))
 
 (defn- no-conduct-error [dispatch-val]
-  (#+clj IllegalArgumentException. #+cljs js/Error.
+  (#?(:clj IllegalArgumentException. :cljs js/Error.)
    (str "No conduct found for dispatch value: " dispatch-val)))
 
 (defn make-intent
@@ -56,20 +56,20 @@
     (with-meta func
       (assoc (meta func) ::state state))))
 
-(defmacro defintent
+#?(:clj (defmacro defintent
   "Create a new intention with the associated options. The docstring and
   attribute map are optional.
 
   Options are key-value pairs and may be one of:
-    :dispatch   the dispatch function, required
-    :combine    the combine function, required
-    :default    the default dispatch value, defaults to :default
-    :hierarchy  the isa? hierarchy to use for dispatching,
-                defaults to the global hierarchy"
+  :dispatch   the dispatch function, required
+  :combine    the combine function, required
+  :default    the default dispatch value, defaults to :default
+  :hierarchy  the isa? hierarchy to use for dispatching,
+  defaults to the global hierarchy"
   {:arglists '([name docstring? attr-map? & options])}
   [name & options]
   (let [[name options] (macro/name-with-attributes name options)]
-    `(def ~name (make-intent ~@options))))
+    `(def ~name (make-intent ~@options)))))
 
 (defn conducts
   "Returns a map of dispatch values to conduct functions for an intention."
@@ -104,8 +104,8 @@
                 (assoc :cache {})))
   intent)
 
-(defmacro defconduct
+#?(:clj (defmacro defconduct
   "Creates and adds a new conduct function, associated with dispatch-val,
   to the supplied intention."
   [intent dispatch-val & fn-tail]
-  `(add-conduct ~intent ~dispatch-val (fn ~@fn-tail)))
+  `(add-conduct ~intent ~dispatch-val (fn ~@fn-tail))))
