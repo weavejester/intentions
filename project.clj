@@ -5,7 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/tools.macro "0.1.2"]]
-  :plugins [[codox "0.8.12"]
+  :plugins [[codox "0.8.13"]
             [lein-cljsbuild "1.0.6"]]
   :cljsbuild
   {:builds
