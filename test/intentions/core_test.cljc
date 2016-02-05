@@ -1,8 +1,7 @@
 (ns intentions.core-test
   #?@(:clj  [(:require [clojure.test :refer :all]
                        [intentions.core :as i])]
-      :cljs [(:require-macros [cemerick.cljs.test :refer [is deftest testing]])
-             (:require [cemerick.cljs.test :as t]
+      :cljs [(:require [cljs.test :refer-macros [deftest is testing]]
                        [intentions.core :as i :include-macros true])]))
 
 (deftest test-intent
