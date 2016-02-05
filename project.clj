@@ -5,9 +5,13 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/tools.macro "0.1.5"]]
-  :plugins [[codox "0.8.13"]
+  :plugins [[lein-codox "0.9.3"]
             [lein-cljsbuild "1.1.2"]
             [lein-doo "0.1.6"]]
+  :codox
+  {:output-path "codox"
+   :metadata {:doc/format :markdown}
+   :source-uri "http://github.com/weavejester/intentions/blob/{version}/{filepath}#L{line}"}
   :cljsbuild
   {:builds
    {:test

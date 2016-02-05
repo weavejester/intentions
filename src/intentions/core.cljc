@@ -3,7 +3,7 @@
   #?(:clj (:require [clojure.tools.macro :as macro])))
 
 (defn intent?
-  "Returns true if the object is an intention."
+  "Returns true if its argument is an intention."
   [x]
   (and (fn? x) (::state (meta x))))
 
@@ -41,7 +41,7 @@
    (str "No conduct found for dispatch value: " dispatch-val)))
 
 (defn make-intent
-  "Create an anonymous intention. See: defintent."
+  "Create an anonymous intention. See: [[defintent]]."
   [& {:keys [dispatch combine default hierarchy]
       :or   {default :default}}]
   {:pre  [(ifn? dispatch) (ifn? combine)]
@@ -61,11 +61,18 @@
   attribute map are optional.
 
   Options are key-value pairs and may be one of:
-  :dispatch   the dispatch function, required
-  :combine    the combine function, required
-  :default    the default dispatch value, defaults to :default
-  :hierarchy  the isa? hierarchy to use for dispatching,
-  defaults to the global hierarchy"
+
+  :dispatch
+  : the dispatch function, required
+
+  :combine
+  : the combine function, required
+
+  :default
+  : the default dispatch value, defaults to `:default`
+
+  :hierarchy
+  : the isa? hierarchy to use for dispatching, defaults to the global hierarchy"
   {:arglists '([name docstring? attr-map? & options])}
   [name & options]
   (let [[name options] (macro/name-with-attributes name options)]
@@ -78,7 +85,7 @@
 
 (defn add-conduct
   "Adds a conduct function to an intention for the supplied dispatch value.
-  See: defconduct."
+  See: [[defconduct]]."
   [intent dispatch-val conduct-fn]
   (swap! (::state (meta intent))
          #(-> % (assoc-in [:conducts dispatch-val] conduct-fn)
@@ -95,8 +102,8 @@
   intent)
 
 (defn prefer-conduct
-  "Causes an intention to evaluate conducts for dispatch-val-x after
-  dispatch-val-y, when neither dispatch value is more specific."
+  "Causes an intention to evaluate conducts for `dispatch-val-x` after
+  `dispatch-val-y`, when neither dispatch value is more specific."
   [intent dispatch-val-x dispatch-val-y]
   (swap! (::state (meta intent))
          #(-> % (update-in [:prefers] disj [dispatch-val-y dispatch-val-x])
@@ -105,7 +112,7 @@
   intent)
 
 #?(:clj (defmacro defconduct
-  "Creates and adds a new conduct function, associated with dispatch-val,
+  "Creates and adds a new conduct function, associated with `dispatch-val`,
   to the supplied intention."
   [intent dispatch-val & fn-tail]
   `(add-conduct ~intent ~dispatch-val (fn ~@fn-tail))))
