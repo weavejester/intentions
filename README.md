@@ -12,7 +12,7 @@ intentions *combine* it.
 Add the following dependency to your project:
 
 ```clojure
-[intentions "0.2.0"]
+[intentions "0.2.1"]
 ```
 
 ## Usage
