@@ -82,3 +82,16 @@
     (is (= (i-test ::ab) #{:a :b}))
     (finally
       #?(:clj (ns-unmap *ns* 'i-test)))))
+
+(deftest test-redefs
+  (try
+    (i/defintent i-test :dispatch identity, :combine into)
+    (i/defconduct i-test :a [_] #{:x})
+
+    (let [f i-test]
+      (i/defintent i-test :dispatch identity, :combine into)
+      (i/defconduct i-test :a [_] #{:y})
+      (is (= (f :a) #{:y})))
+
+    (finally
+      #?(:clj (ns-unmap *ns* 'i-test)))))
