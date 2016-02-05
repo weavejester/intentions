@@ -69,10 +69,7 @@
   {:arglists '([name docstring? attr-map? & options])}
   [name & options]
   (let [[name options] (macro/name-with-attributes name options)]
-    `(let [v# (def ~name)]
-       (when-not (and (.hasRoot v#) (intent? (deref v#)))
-         (def ~name
-           (make-intent ~@options)))))))
+    `(defonce ~name (make-intent ~@options)))))
 
 (defn conducts
   "Returns a map of dispatch values to conduct functions for an intention."
